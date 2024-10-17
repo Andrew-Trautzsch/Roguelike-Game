@@ -23,6 +23,11 @@ public class InputManager : MonoBehaviour
         onFoot.Crouch.performed += ctx => motor.Crouch();
     }
 
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
