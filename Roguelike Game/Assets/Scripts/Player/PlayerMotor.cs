@@ -5,8 +5,9 @@ using UnityEngine;
 public class PlayerMotor : MonoBehaviour
 {
     private CharacterController controller;
+    private PlayerStats playerStats;
+    private PlayerLook playerLook;
     private Vector3 playerVelocity;
-    public float speed = 5f;
     public float gravity = -9.81f;
     public float jumpHeight = 3f;
 
@@ -19,6 +20,8 @@ public class PlayerMotor : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        playerStats = GetComponent<PlayerStats>();
+        playerLook = GetComponent<PlayerLook>();
     }
 
     // Update is called once per frame
@@ -48,7 +51,7 @@ public class PlayerMotor : MonoBehaviour
         Vector3 moveDirection = Vector3.zero;
         moveDirection.x = input.x;
         moveDirection.z = input.y;
-        controller.Move(transform.TransformDirection(moveDirection) * speed * Time.deltaTime);
+        controller.Move(transform.TransformDirection(moveDirection) * playerStats.playerSpeed * Time.deltaTime);
         playerVelocity.y += gravity * Time.deltaTime;
         if (isGrounded && playerVelocity.y < 0)
         {
@@ -71,5 +74,14 @@ public class PlayerMotor : MonoBehaviour
         crouching = !crouching;
         crouchTimer = 0;
         lerpCrouch = true;
+    }
+
+    public void Shoot()
+    {
+        Transform gunBarrel = playerLook.gunBarrel;
+
+        GameObject bullet = GameObject.Instantiate(Resources.Load("Prefabs/PlayerBullet") as GameObject, gunBarrel.position, playerLook.transform.rotation);
+        Vector3 shootDirection = playerLook.transform.forward.normalized;
+        bullet.GetComponent<Rigidbody>().velocity = Quaternion.AngleAxis(Random.Range(-3f, 3f), Vector3.up) * shootDirection * 40;
     }
 }

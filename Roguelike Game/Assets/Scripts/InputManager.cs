@@ -21,6 +21,7 @@ public class InputManager : MonoBehaviour
 
         onFoot.Jump.performed += ctx => motor.Jump();
         onFoot.Crouch.performed += ctx => motor.Crouch();
+        onFoot.Shoot.performed += ctx => motor.Shoot();
     }
 
     void Start()

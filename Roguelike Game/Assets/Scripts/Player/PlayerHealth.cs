@@ -8,9 +8,9 @@ public class PlayerHealth : MonoBehaviour
 {
     private float health;
     private float lerpTimer;
+    private PlayerStats playerStats;
 
     [Header("Health Bar")]
-    public float maxHealth = 100f;
     public float chipSpeed = 2f;
     public Image frontHealthBar;
     public Image backHealthBar;
@@ -25,14 +25,15 @@ public class PlayerHealth : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        health = maxHealth;
+        playerStats = GetComponent<PlayerStats>();
+        health = playerStats.maxHealth;
         overlay.color = new Color(overlay.color.r, overlay.color.g, overlay.color.b, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        health = Mathf.Clamp(health, 0, maxHealth);
+        health = Mathf.Clamp(health, 0, playerStats.maxHealth);
         UpdateHealthUI();
         if (overlay.color.a > 0)
         {
@@ -49,10 +50,10 @@ public class PlayerHealth : MonoBehaviour
     }
     public void UpdateHealthUI()
     {
-        Debug.Log(health);
+        // Debug.Log(health);
         float fillFront = frontHealthBar.fillAmount;
         float fillBack = backHealthBar.fillAmount;
-        float healthFraction = health / maxHealth;
+        float healthFraction = health / playerStats.maxHealth;
 
         if (fillBack > healthFraction)
         {
