@@ -78,10 +78,30 @@ public class PlayerMotor : MonoBehaviour
 
     public void Shoot()
     {
-        Transform gunBarrel = playerLook.gunBarrel;
+        // Ensure the gun barrel and player stats are properly assigned
+        if (playerLook.gunBarrel == null || playerStats == null)
+        {
+            Debug.LogError("Gun barrel or PlayerStats not set!");
+            return;
+        }
 
-        GameObject bullet = GameObject.Instantiate(Resources.Load("Prefabs/PlayerBullet") as GameObject, gunBarrel.position, playerLook.transform.rotation);
-        Vector3 shootDirection = playerLook.transform.forward.normalized;
-        bullet.GetComponent<Rigidbody>().velocity = Quaternion.AngleAxis(Random.Range(-3f, 3f), Vector3.up) * shootDirection * 40;
+        // Spawn the bullet at the gun barrel position
+        GameObject bullet = Instantiate(Resources.Load("Prefabs/PlayerBullet") as GameObject, playerLook.gunBarrel.position, Quaternion.identity);
+
+        // Ensure the bullet has a Rigidbody and apply velocity
+        Rigidbody bulletRigidbody = bullet.GetComponent<Rigidbody>();
+        if (bulletRigidbody != null)
+        {
+            Vector3 shootDirection = playerLook.playerCamera.transform.forward;
+            bulletRigidbody.velocity = shootDirection.normalized * 40f; // Adjust bullet speed
+        }
+
+        // Set the damage on the bullet
+        PlayerBullet playerBullet = bullet.GetComponent<PlayerBullet>();
+        if (playerBullet != null)
+        {
+            playerBullet.Initialize(playerStats.playerDamage); // Pass the player's damage to the bullet
+        }
     }
+
 }

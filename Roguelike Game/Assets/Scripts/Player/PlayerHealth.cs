@@ -1,44 +1,61 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    private float health;
-    private float lerpTimer;
     private PlayerStats playerStats;
+    private float health;
 
     [Header("Health Bar")]
-    public float chipSpeed = 2f;
     public Image frontHealthBar;
     public Image backHealthBar;
+    public float chipSpeed = 2f;
 
     [Header("Damage Overlay")]
     public Image overlay;
     public float duration;
     public float fadeSpeed;
 
+    private float lerpTimer;
     private float durationTimer;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         playerStats = GetComponent<PlayerStats>();
-        health = playerStats.maxHealth;
-        overlay.color = new Color(overlay.color.r, overlay.color.g, overlay.color.b, 0);
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        health = playerStats.maxHealth;
+        overlay.color = new Color(overlay.color.r, overlay.color.g, overlay.color.b, 0);
+        UpdateHealthUI();
+    }
+
     void Update()
     {
         health = Mathf.Clamp(health, 0, playerStats.maxHealth);
         UpdateHealthUI();
+
+        if (health <= 0)
+        {
+            // Player dies
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.GameOver();
+            }
+            else
+            {
+                Debug.LogError("GameManager instance not found!");
+            }
+            enabled = false;
+            return;
+        }
+
+        // Damage overlay fading
         if (overlay.color.a > 0)
         {
-            if (health < 30)
-                return;
+            if (health < 30) return;
+
             durationTimer += Time.deltaTime;
             if (durationTimer >= duration)
             {
@@ -48,9 +65,9 @@ public class PlayerHealth : MonoBehaviour
             }
         }
     }
+
     public void UpdateHealthUI()
     {
-        // Debug.Log(health);
         float fillFront = frontHealthBar.fillAmount;
         float fillBack = backHealthBar.fillAmount;
         float healthFraction = health / playerStats.maxHealth;
@@ -60,18 +77,14 @@ public class PlayerHealth : MonoBehaviour
             frontHealthBar.fillAmount = healthFraction;
             backHealthBar.color = Color.red;
             lerpTimer += Time.deltaTime;
-            float percentComplete = lerpTimer / chipSpeed;
-            percentComplete *= percentComplete;
-            backHealthBar.fillAmount = Mathf.Lerp(fillBack, healthFraction, percentComplete);
+            backHealthBar.fillAmount = Mathf.Lerp(fillBack, healthFraction, lerpTimer / chipSpeed);
         }
         else if (fillBack < healthFraction)
         {
             backHealthBar.color = Color.green;
             backHealthBar.fillAmount = healthFraction;
             lerpTimer += Time.deltaTime;
-            float percentComplete = lerpTimer / chipSpeed;
-            percentComplete *= percentComplete;
-            frontHealthBar.fillAmount = Mathf.Lerp(fillFront, healthFraction, percentComplete);
+            frontHealthBar.fillAmount = Mathf.Lerp(fillFront, healthFraction, lerpTimer / chipSpeed);
         }
     }
 
@@ -86,6 +99,14 @@ public class PlayerHealth : MonoBehaviour
     public void RestoreHealth(float healAmount)
     {
         health += healAmount;
+        health = Mathf.Clamp(health, 0, playerStats.maxHealth);
         lerpTimer = 0f;
+        UpdateHealthUI();
+    }
+
+    public void HealToFull()
+    {
+        health = playerStats.maxHealth;
+        UpdateHealthUI();
     }
 }

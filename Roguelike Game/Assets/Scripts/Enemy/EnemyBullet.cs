@@ -11,7 +11,7 @@ public class EnemyBullet : MonoBehaviour
         if (hitTransform.CompareTag("Player"))
         {
             Debug.Log("Hit Player");
-            hitTransform.GetComponent<PlayerHealth>().TakeDamage(10);
+            hitTransform.GetComponent<PlayerHealth>().TakeDamage(15);
         }
         Destroy(gameObject);
     }
